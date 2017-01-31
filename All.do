@@ -1,4 +1,3 @@
-* as;ldfja;lkdsjf;alkjdf;akljsdf
 
 *******************
 *  Startup
@@ -380,6 +379,19 @@ outreg2 using myreg.doc, append ctitle(income not poor and asset poor)
 
 logit inc_np_asset_np gender age age_sq edu_high edu_23collge edu_4collgeab married ethnicity party health hhsize num_chil num_old Shanxi Liaoning Jiangsu Anhui Shandong Henan Hubei Hunan Guangdong Chongqing Sichuan Yunnan Gansu
 outreg2 using myreg.doc, append ctitle(income not poor and asset not poor)
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 * the result shows that asset poverty rate of rural data is 12.84%, which matches the result while I use commands to do last week
