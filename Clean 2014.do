@@ -68,10 +68,48 @@ save children_2014, replace
 ****************************************
 
 ***************get the info of income and expenses  （income:55534, expense:57387）
-use cfps2014famecon_20161230, replace
-keep fid14 fid12 fid10 provcd14 countyid14 familysize fincome1 finc fr501 fs201 expense fexp fq2 fq6 fr2 ft1 ft101 ft301 ft302
+use cfps2014famecon_20161230, clear 
+keep fid14 fid12 fid10 provcd14 countyid14 familysize fincome1 finc fr501 fs201 expense fexp fq2 fq6 fr2 ft1 ft101 ft201 ft202 ft301 ft302 ft501 ft601 ft602
+
+* recode these values into missing
+mvdecode _all, mv(-8)
+mvdecode _all, mv(-1)
+mvdecode _all, mv(-2)
+
+* rename all the variables 
+gen fincome_tot = finc
+gen fincome_rent = fr501
+gen fincome_rtland = fs201
+gen expense_annual = fexp
+
+gen house_ownership = fq2
+gen house_price = fq6*10000
+gen house_price_other = fr2*10000
+egen house_price_tot=rowtotal(house_price house_price_other)
+* replace house_price_tot = . if fq6 + fr2 > 1000
+
+gen asset_cash = ft1
+gen asset_deposit = ft101
+egen asset_cash_deposit = rowtotal(asset_cash asset_deposit)
+gen asset_financial = ft201
+gen asset_financial_income = ft202
+
+gen debt_mortgage_tot = ft301
+gen debt_bank = ft501
+gen debt_frind = ft601
+gen debt_other_ins = ft602
+egen debt_tot = rowtotal(debt_mortgage_tot debt_bank debt_frind debt_other_ins)
+
+
 sum fincome1
 su expense
+sum house_price_tot
+sum asset_cash_deposit
+sum asset_financial
+sum debt_tot
+
+graph twoway (scatter asset_cash_deposit expense, ms(o) mc(gs4) msize(small))
+
 save family_2014, replace
 
 * fincome1: pure hh income; finc: total income
@@ -124,12 +162,6 @@ drop if fid12==.
 
 drop _merge
 save family_head_2014, replace
-
-
-
-
-
-
 
 
 

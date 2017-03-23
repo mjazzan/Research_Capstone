@@ -72,10 +72,42 @@ save children_2012, replace
 ****************************************
 
 ***************get the info of income and expenses  （income:55534, expense:57387）
-use cfps2012family_092015compress, replace
-keep fid12 fid10 provcd countyidc familysize fincome1 finc fr501m fs201 expense fq2 fq6 fr2 ft1 ft101 ft301 ft302
+use cfps2012family_092015compress, clear
+keep fid12 fid10 provcd countyid familysize fincome1 fr501m expense fq1 houseprice1 fr2a ft1 ft2 ft301 ft401 ft501 ft701 fr301 ft801 ft802
+
+* recode these values into missing
+mvdecode _all, mv(-8)
+mvdecode _all, mv(-1)
+mvdecode _all, mv(-2)
+
+* rename all the variables 
+	* gen fincome_tot
+gen fincome_rent = fr501m
+	* gen fincome_rtland 
+	* gen expense_annual
+
+gen house_ownership = fq1
+gen house_price = houseprice1*10000
+gen house_price_other = fr2a*10000
+egen house_price_tot = rowtotal(house_price house_price_other)
+
+	* gen asset_cash
+	* gen asset_deposit
+gen asset_cash_deposit = ft1
+
+egen asset_financial = rowtotal(ft301 ft401 ft501 ft701)
+	* gen asset_financial_income
+gen debt_mortgage_tot = fr301
+gen debt_bank = ft801
+gen debt_frind_other_ins = ft802
+egen debt_tot = rowtotal(debt_mortgage_tot  debt_bank  debt_frind_other_ins)
+
 sum fincome1
 su expense
+sum house_price_tot
+sum asset_cash_deposit
+sum asset_financial
+sum debt_tot
 save family_2012, replace
 
 * fincome1: pure hh income; finc: total income
@@ -88,11 +120,18 @@ save family_2012, replace
 * fs6: durable goods
 
 * fexp: expense for the last 12 months** THIS IS NOT USEBLE THIS YEAR
-* fq2 fq6 fr2: house price ** MEETING PROBLEM
-* ft1 ft101: cash/saving deposit
-* ft201 ft202: amount of financial asset and income from them
-* ft301 ft302: mortgage total and annual
-* ft501 ft601 ft602: owe bank, friend, other institution
+* fq2 = houseprice1
+* fq6: Non
+* fr2a: other house price ** SIGNIFICANTLY DIFFERENT FROM LAST YEAR
+
+* ft1： cash/saving deposit ** IN THIS YEAR, FT1 INCLUDE BOTH CASH & DEPOSIT - Mean: 25168
+* ft2: interest from deposit
+* ft301: gov bond
+* ft401: stock
+* ft501: financial fund
+* FT701	Total current market value of other financial assets held by family now(yuan)
+* fr301： mortgage total 
+* ft801 ft802: loan from bank and friends
 
 *** Merge family and household head independent_2012 ***
 use head_independent_2012, clear
