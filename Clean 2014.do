@@ -25,14 +25,25 @@ keep if head==p_income
 ********within a household, keep the first one when their personal income are the same   (female：37.86%,  age45)
 bysort fid14: gen head_order=_n
 keep if head_order==1
+
+rename cfps_gender gender 
+rename cfps2014_age age
+rename cfps_party party
+rename cfps_minzu ethnicity
+rename cfps2012_latest_edu edu_latest
+rename pw1r edu_highest
+rename qea0 marriage
+rename qp201 health
+rename employ2014 employ 
+drop head_order qg2
 save head_independent_2014,replace
 
-tab cfps_gender
-su cfps2014_age 
-tab cfps2012_latest_edu
-tab qea0
-tab qp201
-tab employ2014  
+tab gender
+su age 
+tab edu_latest
+tab marriage
+tab health
+tab employ  
 *****Notes:variables like party and ethinicity have a lot of missing
 
 ****************************************************************
@@ -99,19 +110,21 @@ gen debt_bank = ft501
 gen debt_frind = ft601
 gen debt_other_ins = ft602
 egen debt_tot = rowtotal(debt_mortgage_tot debt_bank debt_frind debt_other_ins)
+rename countyid14 countyid
+rename fincome1 f_income
 
 
-sum fincome1
+graph twoway (scatter asset_cash_deposit expense, ms(o) mc(gs4) msize(small))
+
+keep fid14 fid12 fid10 provcd countyid familysize f_income expense house_ownership house_price_tot asset_cash_deposit asset_financial debt_tot
+save family_2014, replace
+
+sum f_income
 su expense
 sum house_price_tot
 sum asset_cash_deposit
 sum asset_financial
 sum debt_tot
-
-graph twoway (scatter asset_cash_deposit expense, ms(o) mc(gs4) msize(small))
-
-save family_2014, replace
-
 * fincome1: pure hh income; finc: total income
 * fr501: rent income fs201: land rent income fs501: income from renting other things
 * fs6: durable goods
@@ -136,19 +149,19 @@ sort fid14
 
 use family_2014, clear
 sort fid14
-merge 1:1 fid14 using old
+merge 1:1 fid14 using old_2014
 drop _merge
 save family_2014, replace
 
 use family_2014, clear
 sort fid14
-merge 1:1 fid14 using depen
+merge 1:1 fid14 using depen_2014
 drop _merge
 save family_2014, replace
 
 use family_2014, clear
 sort fid14
-merge 1:1 fid14 using children
+merge 1:1 fid14 using children_2014
 drop _merge
 save family_2014, replace
 

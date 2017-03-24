@@ -15,7 +15,7 @@ cd "/Users/elmerleezy/Google Drive/Wagner/Semester 4/Capstone/Capstone 2016-2017
 * in 2012, personal income is (income)
 
 use Ecfps2012adultcombined_032015, clear
-keep pid fid12 income cfps2012_gender cfps2012_age cfps_party cfps_minzu cfps2011_latest_edu sw1r qe104 qp201 employ
+keep pid fid12 cfps2012_gender cfps2012_age cfps_minzu cfps_party cfps2011_latest_edu sw1r qe104 qp201 employ income
 save independent_2012
 
 ********get the info of hh head            
@@ -24,18 +24,28 @@ use independent_2012, clear
 bysort fid12: egen head=max(income)
 keep if head==income
 
-
 ********within a household, keep the first one when their personal income are the same 
 * (13,281 households)
 bysort fid12: gen head_order=_n
 keep if head_order==1
+
+rename cfps2012_gender gender 
+rename cfps2012_age age
+rename cfps_party party
+rename cfps_minzu ethnicity
+rename cfps2011_latest_edu edu_latest
+rename sw1r edu_highest
+rename qe104 marriage
+rename qp201 health
+rename income p_income
+drop head_order
 save head_independent_2012,replace
 
-tab cfps2012_gender
-su cfps2012_age 
-tab cfps2012_latest_edu
-tab qe104
-tab qp201
+tab gender
+su age 
+tab edu_latest
+tab marriage
+tab health
 tab employ  
 *****Notes:variables like party and ethinicity have a lot of missing
 
@@ -101,17 +111,20 @@ gen debt_mortgage_tot = fr301
 gen debt_bank = ft801
 gen debt_frind_other_ins = ft802
 egen debt_tot = rowtotal(debt_mortgage_tot  debt_bank  debt_frind_other_ins)
+rename fincome1 f_income 
 
-sum fincome1
+keep fid12 fid10 provcd countyid familysize f_income expense house_ownership house_price_tot asset_cash_deposit asset_financial debt_tot
+save family_2012, replace
+
+sum f_income
 su expense
 sum house_price_tot
 sum asset_cash_deposit
 sum asset_financial
 sum debt_tot
-save family_2012, replace
 
 * fincome1: pure hh income; finc: total income
-** IN THIS YEAR, THERE IS NO FINC
+* * IN THIS YEAR, THERE IS NO FINC
 * fproperty_1: property income 
 * ftransfer_1: transfer income
 * fr501m: rent income; in this year Obs-129 mean-3.813953
@@ -148,19 +161,19 @@ sort fid12
 
 use family_2012, clear
 sort fid12
-merge 1:1 fid12 using old
+merge 1:1 fid12 using old_2012
 drop _merge
 save family_2012, replace
 
 use family_2012, clear
 sort fid12
-merge 1:1 fid12 using depen
+merge 1:1 fid12 using depen_2012
 drop _merge
 save family_2012, replace
 
 use family_2012, clear
 sort fid12
-merge 1:1 fid12 using children
+merge 1:1 fid12 using children_2012
 drop _merge
 save family_2012, replace
 
@@ -168,11 +181,11 @@ use family_2012, clear
 sort fid12
 merge 1:1 fid12 using head_independent_2012
 
-** restrict the sample (total 13777)
+** restrict the sample (total 13281)
 keep if _merge==3
 drop if fid12==.
 
-drop _merge
+drop _merge 
 save family_head_2012, replace
 
 
