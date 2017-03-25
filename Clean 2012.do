@@ -98,7 +98,7 @@ gen fincome_rent = fr501m
 	* gen expense_annual
 
 gen house_ownership = fq1
-gen house_price = houseprice1*10000
+gen house_price = houseprice1
 gen house_price_other = fr2a*10000
 egen house_price_tot = rowtotal(house_price house_price_other)
 
@@ -114,12 +114,14 @@ gen debt_frind_other_ins = ft802
 egen debt_tot = rowtotal(debt_mortgage_tot  debt_bank  debt_frind_other_ins)
 rename fincome1 f_income 
 
-keep fid12 fid10 provcd countyid familysize f_income expense house_ownership house_price_tot asset_cash_deposit asset_financial debt_tot
+graph twoway (scatter house_price f_income, ms(o) mc(gs4) msize(small))
+
+keep fid12 fid10 provcd countyid familysize f_income expense house_ownership house_price house_price_tot asset_cash_deposit asset_financial debt_tot
 save family_2012, replace
 
 sum f_income
 su expense
-sum house_price_tot
+sum house_price if house_price < 7500000
 sum asset_cash_deposit
 sum asset_financial
 sum debt_tot

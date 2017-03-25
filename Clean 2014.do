@@ -102,6 +102,7 @@ gen asset_cash = ft1
 gen asset_deposit = ft101
 egen asset_cash_deposit = rowtotal(asset_cash asset_deposit)
 gen asset_financial = ft201
+replace asset_financial = 0 if asset_financial ==.
 gen asset_financial_income = ft202
 
 gen debt_mortgage_tot = ft301
@@ -115,7 +116,7 @@ rename provcd14 provcd
 
 graph twoway (scatter asset_cash_deposit expense, ms(o) mc(gs4) msize(small))
 
-keep fid14 fid12 fid10 provcd countyid familysize f_income expense house_ownership house_price_tot asset_cash_deposit asset_financial debt_tot
+keep fid14 fid12 fid10 provcd countyid familysize f_income expense house_ownership house_price house_price_tot asset_cash_deposit asset_financial debt_tot
 save family_2014, replace
 
 sum f_income

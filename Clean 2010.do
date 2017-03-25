@@ -119,7 +119,7 @@ gen debt_frind_other_ins = fh201_a_3+fh201_a_5+fh201_a_6
 egen debt_tot = rowtotal(debt_mortgage_tot  debt_bank  debt_frind_other_ins)
 
 rename fid fid10
-keep fid10 provcd countyid familysize f_income expense house_ownership house_price_tot asset_cash_deposit asset_financial debt_tot
+keep fid10 provcd countyid familysize f_income expense house_ownership house_price house_price_tot asset_cash_deposit asset_financial debt_tot
 save family_2010, replace
 
 
