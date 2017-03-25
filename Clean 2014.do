@@ -9,20 +9,18 @@ cd "/Users/elmerleezy/Google Drive/Wagner/Semester 4/Capstone/Capstone 2016-2017
 *** Household Head Analysis ***
 ****************************************************************
 
-** gender age party ethinicity(minzu), highest level of edu(pw1r), current marital status(qea0), 
-** self-eval health(qp201), employment(employ2014), type of employer(qg2)
+*** gender age party ethinicity(minzu), highest level of edu(pw1r), current marital status(qea0), self-eval health(qp201), employment(employ2014), type of employer(qg2)
 use ecfps2014adult_2016, clear
 keep pid fid14 p_income cfps_gender cfps2014_age cfps_party cfps_minzu cfps2012_latest_edu pw1r qea0 qp201 employ2014 qg2
 save independent_2014
 
-********get the info of hh head             (13944 households)
-*****keep the person with the largest amount of personal income
+*** get the info of hh head             (13944 households)
+*** keep the person with the largest amount of personal income
 use independent_2014
 bysort fid14: egen head=max(p_income)
 keep if head==p_income
 
-
-********within a household, keep the first one when their personal income are the same   (female：37.86%,  age45)
+*** within a household, keep the first one when their personal income are the same   (female：37.86%,  age45)
 bysort fid14: gen head_order=_n
 keep if head_order==1
 
@@ -30,12 +28,13 @@ rename cfps_gender gender
 rename cfps2014_age age
 rename cfps_party party
 rename cfps_minzu ethnicity
-rename cfps2012_latest_edu edu_latest
-rename pw1r edu_highest
+rename cfps2012_latest_edu edu_highest 
+	* to make variable constant we lable cfps2012_latest_edu as the highest education rather than pw1r
+* rename pw1r edu_highest
 rename qea0 marriage
 rename qp201 health
 rename employ2014 employ 
-drop head_order qg2
+drop head_order head qg2 pw1r
 save head_independent_2014,replace
 
 tab gender
@@ -112,7 +111,7 @@ gen debt_other_ins = ft602
 egen debt_tot = rowtotal(debt_mortgage_tot debt_bank debt_frind debt_other_ins)
 rename countyid14 countyid
 rename fincome1 f_income
-
+rename provcd14 provcd
 
 graph twoway (scatter asset_cash_deposit expense, ms(o) mc(gs4) msize(small))
 
@@ -135,17 +134,7 @@ sum debt_tot
 * ft501 ft601 ft602: owe bank, friend, other institution
 
 *** Merge family and household head independent_2014 ***
-use head_independent_2014, clear
-sort fid14
 
-use old_2014, clear
-sort fid14
-
-use depen_2014, clear
-sort fid14
-
-use children_2014, clear
-sort fid14
 
 use family_2014, clear
 sort fid14

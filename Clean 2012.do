@@ -18,13 +18,13 @@ use Ecfps2012adultcombined_032015, clear
 keep pid fid12 cfps2012_gender cfps2012_age cfps_minzu cfps_party cfps2011_latest_edu sw1r qe104 qp201 employ income
 save independent_2012
 
-********get the info of hh head            
-*****keep the person with the largest amount of personal income
+*** get the info of hh head            
+*** keep the person with the largest amount of personal income
 use independent_2012, clear 
 bysort fid12: egen head=max(income)
 keep if head==income
 
-********within a household, keep the first one when their personal income are the same 
+*** within a household, keep the first one when their personal income are the same 
 * (13,281 households)
 bysort fid12: gen head_order=_n
 keep if head_order==1
@@ -33,12 +33,13 @@ rename cfps2012_gender gender
 rename cfps2012_age age
 rename cfps_party party
 rename cfps_minzu ethnicity
-rename cfps2011_latest_edu edu_latest
-rename sw1r edu_highest
+rename cfps2011_latest_edu edu_highest
+	* to make variable constant we lable cfps2012_latest_edu as the highest education rather than sw1r
+* rename sw1r edu_highest
 rename qe104 marriage
 rename qp201 health
 rename income p_income
-drop head_order
+drop head_order head sw1r
 save head_independent_2012,replace
 
 tab gender
@@ -147,17 +148,6 @@ sum debt_tot
 * ft801 ft802: loan from bank and friends
 
 *** Merge family and household head independent_2012 ***
-use head_independent_2012, clear
-sort fid12
-
-use old_2012, clear
-sort fid12
-
-use depen_2012, clear
-sort fid12
-
-use children_2012, clear
-sort fid12
 
 use family_2012, clear
 sort fid12
@@ -187,5 +177,4 @@ drop if fid12==.
 
 drop _merge 
 save family_head_2012, replace
-
 
