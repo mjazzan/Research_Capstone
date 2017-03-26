@@ -98,6 +98,7 @@ sum debt_tot
 
 save family_head_all_restrict1, replace
 
+use family_head_all_restrict1, clear
 
 
 
