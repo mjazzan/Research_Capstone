@@ -3,7 +3,7 @@ prog drop _all
 capture log close
 set more off
 
-cd "/Users/elmerleezy/Google Drive/Wagner/Semester 4/Capstone/Capstone 2016-2017/Data/Raw - CFPS/2012"
+cd "/Users/zongyangli/Google Drive/Wagner/Semester 4/Capstone/Capstone 2016-2017/Data/Raw - CFPS/2012"
 
 ****************************************************************
 *** Household Head Analysis ***
@@ -84,7 +84,7 @@ save children_2012, replace
 
 ***************get the info of income and expenses  （income:55534, expense:57387）
 use cfps2012family_092015compress, clear
-keep fid12 fid10 provcd countyid familysize fincome1 fr501m expense fq1 houseprice1 fr2a ft1 ft2 ft301 ft401 ft501 ft701 fr301 ft801 ft802
+keep fid12 fid10 provcd countyid urban12 familysize fincome1 fr501m expense fq1 houseprice1 fr2a ft1 ft2 ft301 ft401 ft501 ft701 fr301 ft801 ft802
 
 * recode these values into missing
 mvdecode _all, mv(-8)
@@ -113,10 +113,11 @@ gen debt_bank = ft801
 gen debt_frind_other_ins = ft802
 egen debt_tot = rowtotal(debt_mortgage_tot  debt_bank  debt_frind_other_ins)
 rename fincome1 f_income 
+rename urban12 urban
 
 graph twoway (scatter house_price f_income, ms(o) mc(gs4) msize(small))
 
-keep fid12 fid10 provcd countyid familysize f_income expense house_ownership house_price house_price_tot asset_cash_deposit asset_financial debt_tot
+keep fid12 fid10 provcd countyid urban familysize f_income expense house_ownership house_price house_price_tot asset_cash_deposit asset_financial debt_mortgage_tot debt_frind_other_ins debt_tot
 save family_2012, replace
 
 sum f_income

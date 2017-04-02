@@ -3,7 +3,7 @@ prog drop _all
 capture log close
 set more off
 
-cd "/Users/elmerleezy/Google Drive/Wagner/Semester 4/Capstone/Capstone 2016-2017/Data/Raw - CFPS/2014"
+cd "/Users/zongyangli/Google Drive/Wagner/Semester 4/Capstone/Capstone 2016-2017/Data/Raw - CFPS/2014"
 
 ****************************************************************
 *** Household Head Analysis ***
@@ -79,7 +79,7 @@ save children_2014, replace
 
 ***************get the info of income and expenses  （income:55534, expense:57387）
 use cfps2014famecon_20161230, clear 
-keep fid14 fid12 fid10 provcd14 countyid14 familysize fincome1 finc fr501 fs201 expense fexp fq2 fq6 fr2 ft1 ft101 ft201 ft202 ft301 ft302 ft501 ft601 ft602
+keep fid14 fid12 fid10 provcd14 countyid14 urban14 familysize fincome1 finc fr501 fs201 expense fexp fq2 fq6 fr2 ft1 ft101 ft201 ft202 ft301 ft302 ft501 ft601 ft602
 
 * recode these values into missing
 mvdecode _all, mv(-8)
@@ -102,21 +102,22 @@ gen asset_cash = ft1
 gen asset_deposit = ft101
 egen asset_cash_deposit = rowtotal(asset_cash asset_deposit)
 gen asset_financial = ft201
-replace asset_financial = 0 if asset_financial ==.
 gen asset_financial_income = ft202
 
 gen debt_mortgage_tot = ft301
 gen debt_bank = ft501
 gen debt_frind = ft601
 gen debt_other_ins = ft602
+gen debt_frind_other_ins = debt_frind + debt_other_ins
 egen debt_tot = rowtotal(debt_mortgage_tot debt_bank debt_frind debt_other_ins)
 rename countyid14 countyid
 rename fincome1 f_income
 rename provcd14 provcd
+rename urban14 urban
 
 graph twoway (scatter asset_cash_deposit expense, ms(o) mc(gs4) msize(small))
 
-keep fid14 fid12 fid10 provcd countyid familysize f_income expense house_ownership house_price house_price_tot asset_cash_deposit asset_financial debt_tot
+keep fid14 fid12 fid10 provcd countyid urban familysize f_income expense house_ownership house_price house_price_tot asset_cash_deposit asset_financial debt_mortgage_tot debt_frind_other_ins debt_tot
 save family_2014, replace
 
 sum f_income

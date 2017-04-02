@@ -3,7 +3,7 @@ prog drop _all
 capture log close
 set more off
 
-cd "/Users/elmerleezy/Google Drive/Wagner/Semester 4/Capstone/Capstone 2016-2017/Data/Raw - CFPS/2010"
+cd "/Users/zongyangli/Google Drive/Wagner/Semester 4/Capstone/Capstone 2016-2017/Data/Raw - CFPS/2010"
 
 ****************************************************************
 *** Household Head Analysis ***
@@ -86,7 +86,7 @@ save children_2010, replace
 
 ***************get the info of income and expenses  （income:55534, expense:57387）
 use cfps2010family_report_nat072016, clear
-keep fid provcd countyid familysize ff601 ff401 expense fd1 fd4 fd703 total_asset savings stock funds debit_other company otherasset valuable nonhousing_debts house_debts  fh201_a_1 fh201_a_3 fh201_a_5 fh201_a_6   
+keep fid provcd countyid urban familysize ff601 ff401 expense fd1 fd4 fd703 total_asset savings stock funds debit_other company otherasset valuable nonhousing_debts house_debts  fh201_a_1 fh201_a_3 fh201_a_5 fh201_a_6   
 
 * recode these values into missing
 mvdecode _all, mv(-8)
@@ -119,7 +119,7 @@ gen debt_frind_other_ins = fh201_a_3+fh201_a_5+fh201_a_6
 egen debt_tot = rowtotal(debt_mortgage_tot  debt_bank  debt_frind_other_ins)
 
 rename fid fid10
-keep fid10 provcd countyid familysize f_income expense house_ownership house_price house_price_tot asset_cash_deposit asset_financial debt_tot
+keep fid10 provcd countyid urban familysize f_income expense house_ownership house_price house_price_tot asset_cash_deposit asset_financial debt_mortgage_tot debt_frind_other_ins debt_tot
 save family_2010, replace
 
 
