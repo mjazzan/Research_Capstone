@@ -1,0 +1,100 @@
+##################################################
+# Prepare
+##################################################
+
+setwd("/Users/elmerleezy/Google Drive/Wagner/Semester 4/Capstone/Capstone 2016-2017/Data/Raw - CFPS")
+install.packages("readstata13")
+library(readstata13)
+
+##################################################
+# Clean
+##################################################
+
+family_head_all_restrict2 <- read.dta13("family_head_all_restrict2.dta")
+
+family_head_all_restrict2.0 <- family_head_all_restrict2 %>%
+	dplyr::select(-head) %>% 
+	dplyr::mutate(debt_tot = debt_mortgage_tot + debt_frind_other_ins) %>%
+	group_by(fid10) %>% # here only group by fid10 to see duplicates across years
+    dplyr::mutate(num_obs = n()) %>%
+    select(fid14, fid12, fid10, year, provcd, countyid, urban, f_income, expense, asset_cash_deposit, asset_financial, house_ownership, house_price, house_price_tot, debt_mortgage_tot, debt_frind_other_ins, debt_tot, old, children, depen, familysize, pid, ethnicity, age, party, gender, edu_highest, marriage, health, p_income, employ, num_obs)
+
+table(family_head_all_restrict2.0$num_obs)
+	# 1     2     3     4     5       6     7     8 
+	# 1523  4112 28917  4484  2025   222   154    56 
+
+
+## Keep obs with complete
+family_head_all_restrict2.1 <- family_head_all_restrict2.0 %>% filter(num_obs ==3)
+
+## Deal obs with more
+family_head_all_restrict2.2 <- family_head_all_restrict2.0 %>%
+	filter(num_obs >3) %>%
+	group_by(year,fid10) %>% # here group by both fid10 and year to see duplicates in a single year
+	dplyr::mutate(num_obs = n())
+
+table(family_head_all_restrict2.2$num_obs)
+	#    1    2    3    4    5 
+	# 2779 3608  489   60    5 
+
+family_head_all_restrict2.20 <- family_head_all_restrict2.2 %>% filter(num_obs ==1) 
+
+family_head_all_restrict2.21 <- family_head_all_restrict2.2 %>%
+	filter(num_obs>1) %>%
+	group_by(year,fid10) %>%
+	summarise(fid14 = first(fid14),
+			fid12 = first(fid12),
+			provcd = first(provcd),
+			countyid = first(countyid),
+			urban = first(urban),
+			f_income = mean(f_income,na.rm=T),
+			expense = mean(expense,na.rm=T),
+			asset_cash_deposit = mean(asset_cash_deposit,na.rm=T),
+			asset_financial = mean(asset_financial,na.rm=T),
+			house_ownership = mean(house_ownership,na.rm=T),
+			house_price = mean(house_price,na.rm=T),
+			house_price_tot = mean(house_price_tot,na.rm=T),
+			debt_mortgage_tot = mean(debt_mortgage_tot,na.rm=T),
+			debt_frind_other_ins = mean(debt_frind_other_ins,na.rm=T),
+			debt_tot = mean(debt_tot,na.rm=T),
+			old = mean(old,na.rm=T),
+			children = mean(children,na.rm=T),
+			depen = mean(depen,na.rm=T),
+			familysize = mean(familysize,na.rm=T),
+			pid = first(pid),
+			ethnicity = first(ethnicity),
+			age = mean(age,na.rm=T),
+			party = first(party),
+			gender = first(gender),
+			edu_highest = first(edu_highest),
+			marriage = first(marriage),
+			health = first(health),
+			p_income = mean(p_income,na.rm=T),
+			employ = first(employ),
+			num_obs = mean(num_obs,na.rm=T)) 
+
+family_head_all_restrict2.23 <- bind_rows(family_head_all_restrict2.20, family_head_all_restrict2.21)
+family_head_all_restrict2.23<-family_head_all_restrict2.23[order(family_head_all_restrict2.23$fid10),]
+family_head_all_restrict2.23 <- family_head_all_restrict2.23 %>% group_by(fid10) %>% mutate(num_obs = n())
+table(family_head_all_restrict2.23$num_obs)
+  #  2    3 
+  # 28 4734 
+family_head_all_restrict2.23 <- family_head_all_restrict2.23 %>% filter(num_obs ==3)
+
+## Append together
+
+family_head_all_restrict_final <- bind_rows(family_head_all_restrict2.1, family_head_all_restrict2.23) %>%
+	group_by(fid10) %>%
+	dplyr::mutate(num_obs = n())
+table(family_head_all_restrict_final$num_obs)
+
+##################################################
+# Export
+##################################################
+setwd("/Users/elmerleezy/Google Drive/Wagner/Semester 4/Capstone/Capstone 2016-2017/Data/Raw - CFPS")
+save(family_head_all_restrict_final, file = "family_head_all_restrict_final.RData")
+write.csv(family_head_all_restrict_final, file = 'family_head_all_restrict_final.csv')
+
+
+
+
