@@ -81,6 +81,57 @@ table(beetles$Species, cv.prediction, dnn = c('Actual Group','Predicted Group'))
 beetle.qda.cv <- qda(Species ~.-Measurement.Number, CV = TRUE, data = beetles)
 table(beetles$Species, beetle.qda.cv$class, dnn = c('Actual Group','Predicted Group'))
 
+###############################################################################
+## Example 2: http://www.statmethods.net/advstats/discriminant.html
+###############################################################################
+
+## LDA
+
+# Linear Discriminant Analysis with Jacknifed Prediction 
+library(MASS)
+fit <- lda(G ~ x1 + x2 + x3, data=mydata, 
+   na.action="na.omit", CV=TRUE)
+fit # show results
+  # cmt: The code above performs an LDA, using listwise deletion of missing data. CV=TRUE generates jacknifed (i.e., leave one out) predictions.
+
+# Assess the accuracy of the prediction
+# percent correct for each category of G
+ct <- table(mydata$G, fit$class)
+diag(prop.table(ct, 1))
+# total percent correct
+sum(diag(prop.table(ct)))
+
+
+## QDA
+
+# Quadratic Discriminant Analysis with 3 groups applying 
+# resubstitution prediction and equal prior probabilities. 
+library(MASS)
+fit <- qda(G ~ x1 + x2 + x3 + x4, data=na.omit(mydata),
+  prior=c(1,1,1)/3))
+
+
+## Compare results
+
+# Scatter plot using the 1st two discriminant dimensions 
+plot(fit) # fit from lda
+
+# Panels of histograms and overlayed density plots
+# for 1st discriminant function
+plot(fit, dimen=1, type="both") # fit from lda
+
+# Exploratory Graph for LDA or QDA
+library(klaR)
+partimat(G~x1+x2+x3,data=mydata,method="lda")
+
+# Scatterplot for 3 Group Problem 
+pairs(mydata[c("x1","x2","x3")], main="My Title ", pch=22, 
+   bg=c("red", "yellow", "blue")[unclass(mydata$G)])
+
+
+
+
+
 
 
 
