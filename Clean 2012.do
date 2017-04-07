@@ -3,7 +3,7 @@ prog drop _all
 capture log close
 set more off
 
-cd "/Users/zongyangli/Google Drive/Wagner/Semester 4/Capstone/Capstone 2016-2017/Data/Raw - CFPS/2012"
+cd "/Users/elmerleezy/Google Drive/Wagner/Semester 4/Capstone/Capstone 2016-2017/Data/Raw - CFPS/2012"
 
 ****************************************************************
 *** Household Head Analysis ***
@@ -15,8 +15,8 @@ cd "/Users/zongyangli/Google Drive/Wagner/Semester 4/Capstone/Capstone 2016-2017
 * in 2012, personal income is (income)
 
 use Ecfps2012adultcombined_032015, clear
-keep pid fid12 cfps2012_gender cfps2012_age cfps_minzu cfps_party cfps2011_latest_edu sw1r qe104 qp201 employ income
-save independent_2012
+keep pid fid12 cfps2012_gender cfps2012_age qa701code cfps_party cfps2011_latest_edu sw1r qe104 qp201 employ income
+save independent_2012,replace
 
 *** get the info of hh head            
 *** keep the person with the largest amount of personal income
@@ -32,7 +32,7 @@ keep if head_order==1
 rename cfps2012_gender gender 
 rename cfps2012_age age
 rename cfps_party party
-rename cfps_minzu ethnicity
+rename qa701code ethnicity
 rename cfps2011_latest_edu edu_highest
 	* to make variable constant we lable cfps2012_latest_edu as the highest education rather than sw1r
 * rename sw1r edu_highest

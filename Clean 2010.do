@@ -3,7 +3,7 @@ prog drop _all
 capture log close
 set more off
 
-cd "/Users/zongyangli/Google Drive/Wagner/Semester 4/Capstone/Capstone 2016-2017/Data/Raw - CFPS/2010"
+cd "/Users/elmerleezy/Google Drive/Wagner/Semester 4/Capstone/Capstone 2016-2017/Data/Raw - CFPS/2010"
 
 ****************************************************************
 *** Household Head Analysis ***
@@ -18,6 +18,13 @@ cd "/Users/zongyangli/Google Drive/Wagner/Semester 4/Capstone/Capstone 2016-2017
 use cfps2010adult_report_nat072016, clear
 keep pid fid income gender qa1age qa701 qa5code cfps2010edu_best qe1 qp3 qg3
 save independent_2010
+
+use cfps2010adult_report_nat072016, clear
+keep pid fid qa5code
+rename fid fid10
+rename qa5code ethnicity
+save ethnicity_2010, replace
+
 
 ********get the info of hh head            
 *****keep the person with the largest amount of personal income

@@ -3,27 +3,31 @@ prog drop _all
 capture log close
 set more off
 
-cd "/Users/zongyangli/Google Drive/Wagner/Semester 4/Capstone/Capstone 2016-2017/Data/Raw - CFPS/2010"
+******************************************
+** Import Datasets and Prepare
+******************************************
+
+cd "/Users/elmerleezy/Google Drive/Wagner/Semester 4/Capstone/Capstone 2016-2017/Data/Raw - CFPS/2010"
 use family_head_2010, clear
 gen year = 2010
-cd "/Users/zongyangli/Google Drive/Wagner/Semester 4/Capstone/Capstone 2016-2017/Data/Raw - CFPS"
+cd "/Users/elmerleezy/Google Drive/Wagner/Semester 4/Capstone/Capstone 2016-2017/Data/Raw - CFPS"
 save family_head_2010, replace
 
-cd "/Users/zongyangli/Google Drive/Wagner/Semester 4/Capstone/Capstone 2016-2017/Data/Raw - CFPS/2012"
+cd "/Users/elmerleezy/Google Drive/Wagner/Semester 4/Capstone/Capstone 2016-2017/Data/Raw - CFPS/2012"
 use family_head_2012, clear
 drop edu_highest
 rename edu_latest edu_highest
 gen year = 2012
-cd "/Users/zongyangli/Google Drive/Wagner/Semester 4/Capstone/Capstone 2016-2017/Data/Raw - CFPS"
+cd "/Users/elmerleezy/Google Drive/Wagner/Semester 4/Capstone/Capstone 2016-2017/Data/Raw - CFPS"
 save family_head_2012, replace
 
-cd "/Users/zongyangli/Google Drive/Wagner/Semester 4/Capstone/Capstone 2016-2017/Data/Raw - CFPS/2014"
+cd "/Users/elmerleezy/Google Drive/Wagner/Semester 4/Capstone/Capstone 2016-2017/Data/Raw - CFPS/2014"
 use family_head_2014, clear
 drop edu_highest
 rename edu_latest edu_highest
 gen year = 2014
 sort fid12
-cd "/Users/zongyangli/Google Drive/Wagner/Semester 4/Capstone/Capstone 2016-2017/Data/Raw - CFPS"
+cd "/Users/elmerleezy/Google Drive/Wagner/Semester 4/Capstone/Capstone 2016-2017/Data/Raw - CFPS"
 save family_head_2014,replace
 
 cd "/Users/elmerleezy/Google Drive/Wagner/Semester 4/Capstone/Capstone 2016-2017/Data/Raw - CFPS"
@@ -40,8 +44,12 @@ bysort fid10: gen num_obs=_n
 table num_obs
 drop num_obs
 
-*** Check Variables 
 
+
+******************************************
+** Check Vavirables
+******************************************
+ 
 * debt - test restriction
 sum debt_tot if year == 2010 & f_income < 2000000 & debt_tot < 2000000
 sum debt_tot if year == 2012 & f_income < 2000000 & debt_tot < 2000000
@@ -83,8 +91,12 @@ sum house_price_tot if year == 2014 & f_income < 2000000
 	/* problem: a lot of missing for second houses for year 2012 */
 graph twoway (scatter house_price f_income, ms(o) mc(gs4) msize(small))
 
-** Restrict the data
 
+******************************************
+** Restrict the data I
+******************************************
+
+drop head
 drop if fid10==.
 keep if f_income < 2000000 | f_income==.
 keep if debt_tot < 2000000 | debt_tot==.
@@ -100,39 +112,28 @@ sum debt_tot
 
 save family_head_all_restrict1, replace
 
+
+******************************************
+** Restrict the data II
+******************************************
+
+cd "/Users/elmerleezy/Google Drive/Wagner/Semester 4/Capstone/Capstone 2016-2017/Data/Raw - CFPS"
 use family_head_all_restrict1, clear
 
-rename house_price house_price_old
-rename asset_cash_deposit asset_cash_deposit_old
-rename asset_financial asset_financial_old
-rename debt_mortgage_tot debt_mortgage_tot_old
-rename debt_frind_other_ins debt_frind_other_ins_old
-rename children children_old
+* Replace missing with 0's
+replace house_price = 0 if house_price ==.
+replace asset_cash_deposit = 0 if asset_cash_deposit==.
+replace asset_financial = 0 if asset_financial==.
+replace debt_mortgage_tot = 0 if debt_mortgage_tot==.
+replace debt_frind_other_ins = 0 if debt_frind_other_ins==.
+replace children = 0 if children==.
 
-generate house_price = house_price_old
-replace house_price = 0 if house_price_old==.
-generate asset_cash_deposit = asset_cash_deposit_old
-replace asset_cash_deposit = 0 if asset_cash_deposit_old==.
-generate asset_financial = asset_financial_old
-replace asset_financial = 0 if asset_financial_old==.
-generate debt_mortgage_tot = debt_mortgage_tot_old
-replace debt_mortgage_tot = 0 if debt_mortgage_tot_old==.
-generate debt_frind_other_ins = debt_frind_other_ins_old
-replace debt_frind_other_ins = 0 if debt_frind_other_ins_old==.
-generate children = children_old
-replace children = 0 if children_old==.
-
-drop *_old
+* Deal with missings
+replace age =. if age<0
+replace marriage =. if marriage <0
+replace health =. if health <0
+replace p_income=. if p_income <0
+replace employ =. if employ ==8 | employ ==-8
 
 save family_head_all_restrict2, replace
-
-
-
-
-
-
-
-
-
-
-
+** Turn to R from here 

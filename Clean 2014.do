@@ -3,7 +3,7 @@ prog drop _all
 capture log close
 set more off
 
-cd "/Users/zongyangli/Google Drive/Wagner/Semester 4/Capstone/Capstone 2016-2017/Data/Raw - CFPS/2014"
+cd "/Users/elmerleezy/Google Drive/Wagner/Semester 4/Capstone/Capstone 2016-2017/Data/Raw - CFPS/2014"
 
 ****************************************************************
 *** Household Head Analysis ***
@@ -11,8 +11,8 @@ cd "/Users/zongyangli/Google Drive/Wagner/Semester 4/Capstone/Capstone 2016-2017
 
 *** gender age party ethinicity(minzu), highest level of edu(pw1r), current marital status(qea0), self-eval health(qp201), employment(employ2014), type of employer(qg2)
 use ecfps2014adult_2016, clear
-keep pid fid14 p_income cfps_gender cfps2014_age cfps_party cfps_minzu cfps2012_latest_edu pw1r qea0 qp201 employ2014 qg2
-save independent_2014
+keep pid fid14 p_income cfps_gender cfps2014_age cfps_party qa701code cfps2012_latest_edu pw1r qea0 qp201 employ2014 qg2
+save independent_2014,replace
 
 *** get the info of hh head             (13944 households)
 *** keep the person with the largest amount of personal income
@@ -27,7 +27,7 @@ keep if head_order==1
 rename cfps_gender gender 
 rename cfps2014_age age
 rename cfps_party party
-rename cfps_minzu ethnicity
+rename qa701code ethnicity
 rename cfps2012_latest_edu edu_highest 
 	* to make variable constant we lable cfps2012_latest_edu as the highest education rather than pw1r
 * rename pw1r edu_highest
@@ -115,7 +115,7 @@ rename fincome1 f_income
 rename provcd14 provcd
 rename urban14 urban
 
-graph twoway (scatter asset_cash_deposit expense, ms(o) mc(gs4) msize(small))
+* graph twoway (scatter asset_cash_deposit expense, ms(o) mc(gs4) msize(small))
 
 keep fid14 fid12 fid10 provcd countyid urban familysize f_income expense house_ownership house_price house_price_tot asset_cash_deposit asset_financial debt_mortgage_tot debt_frind_other_ins debt_tot
 save family_2014, replace
