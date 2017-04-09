@@ -6,9 +6,9 @@ setwd("/Users/elmerleezy/Google Drive/Wagner/Semester 4/Capstone/Capstone 2016-2
 install.packages("readstata13")
 library(readstata13)
 
-##################################################
+################################################
 # Clean
-##################################################
+################################################
 
 family_head_all_restrict2 <- read.dta13("family_head_all_restrict2.dta")
 
@@ -88,9 +88,9 @@ family_head_all_restrict_final <- bind_rows(family_head_all_restrict2_1, family_
 	dplyr::mutate(num_obs = n())
 table(family_head_all_restrict_final$num_obs)
 
-##################################################
+################################################
 # Merge in and replace ethnicity data
-##################################################
+################################################
 
 ethnicity_2010 <- read.dta13("ethnicity_2010.dta")
 
@@ -109,9 +109,9 @@ family_head_all_restrict_final$ethnicity[family_head_all_restrict_final$ethnicit
 family_head_all_restrict_final$urban[family_head_all_restrict_final$urban < 0] <- NA
 
 
-##################################################
+################################################
 # Merge in MLS Data 
-##################################################
+################################################
 
 mls <- read.dta13("merge_all.dta")
 
@@ -148,9 +148,9 @@ mls_all$year <- as.integer(as.character(mls_all$year))
 
 family_head_all_restrict_final_1 <- family_head_all_restrict_final %>% left_join(mls_all, by=c('provcd','year','urban'))
 
-##################################################
+################################################
 # Other restrictions
-##################################################
+################################################
 
 family_head_all_restrict_final_1$employ[is.na(family_head_all_restrict_final_1$employ)] <- 0
 family_head_all_restrict_final_1$party <- NULL
@@ -172,9 +172,54 @@ family_head_all_restrict_final_1$house_price <- ifelse(family_head_all_restrict_
 												family_head_all_restrict_final_1$house_price)
 
 
-##################################################
+################################################
+# Add Poverty Lines
+################################################
+
+family_head_all_restrict_final_1 <- family_head_all_restrict_final_1 %>%
+	mutate( asset_liq = asset_cash_deposit+asset_financial, 
+		    asset_tot = asset_cash_deposit+asset_financial+house_price, 
+		    asset_net = asset_cash_deposit+asset_financial+house_price-debt_tot) %>%
+	mutate( asset_liq_index = asset_liq/(mls*familysize*3),
+		    asset_tot_index = asset_tot/(mls*familysize*3),
+		    asset_net_index = asset_net/(mls*familysize*3)) %>%
+	mutate( asset_liq_p = ifelse(asset_liq_index<1,1,0),
+			asset_tot_p = ifelse(asset_tot_index<1,1,0),
+			asset_net_p = ifelse(asset_net_index<1,1,0)) %>%
+	mutate( income_index = f_income/(12*mls*familysize), 
+			income_p = ifelse(income_index<1,1,0))
+
+family_head_all_restrict_final_1 <- family_head_all_restrict_final_1 %>%
+	mutate(income_p_asset_p = ifelse(income_p == 0,0,ifelse(asset_net_p ==0,0,1)), 
+		   income_np_asset_p = ifelse(income_p == 1,0,ifelse(asset_net_p ==0,0,1)), 
+		   income_p_asset_np = ifelse(income_p == 0,0,ifelse(asset_net_p ==1,0,1)), 
+		   income_np_asset_np = ifelse(income_p == 1,0,ifelse(asset_net_p ==1,0,1)))
+
+## See summary
+ggplot(family_head_all_restrict_final_1, aes(y=asset_net_index, x=income_index)) +
+  geom_point(shape = 1)+
+  geom_smooth(method=lm) 
+
+ggplot(family_head_all_restrict_final_1, aes(y=asset_liq_index, x=income_index)) +
+  geom_point(shape = 1)+
+  geom_smooth(method=lm) 
+
+	summary(family_head_all_restrict_final_1$income_p_asset_p)
+	summary(family_head_all_restrict_final_1$income_np_asset_p)
+	summary(family_head_all_restrict_final_1$income_p_asset_np)
+	summary(family_head_all_restrict_final_1$income_np_asset_np)
+
+
+family_head_all_restrict_final_2 <- family_head_all_restrict_final_1 %>%
+	filter(income_index <100, asset_liq_index<300)
+
+ggplot(family_head_all_restrict_final_2, aes(y=asset_liq_index, x=income_index)) +
+  geom_point(shape = 1)+
+  geom_smooth(method=lm) 
+
+################################################
 # Export
-##################################################
+################################################
 library(foreign)
 setwd("/Users/elmerleezy/Google Drive/Wagner/Semester 4/Capstone/Capstone 2016-2017/Data/Raw - CFPS")
 save(family_head_all_restrict_final_1, file = "family_head_all_restrict_final_1.RData")
