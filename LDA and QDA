@@ -1,0 +1,64 @@
+setwd("~/Dropbox/NYU/Spring/Econometrics/Project/Data")
+
+library(MASS)
+library(caret)
+load("family_head_all_restrict_final_1.RData")
+data = family_head_all_restrict_final_1
+attach(data)
+
+#Creating function to calculate missclassification rate
+rm(misclassification.rate)
+misclassification.rate=function(tab){
+  num1=sum(diag(tab))
+  denom1=sum(tab)
+  signif(1-num1/denom1,3)
+}
+
+#Creating one categorical variable
+data$category = ifelse(data$income_p_asset_p==1,0,ifelse(data$income_np_asset_p==1,1, ifelse(data$income_p_asset_np==1,2,ifelse(data$income_np_asset_np==1,3,0))))
+
+##Using 2010 and 2012 as train, to test on 2014
+train = subset(data, year<2013)
+test = subset(data, year>2013)
+
+#LDA model
+lda1 = lda(category~provcd+countyid+urban+f_income+expense+asset_tot+debt_tot+old+children+depen+age+gender+edu_highest+marriage+health+employ, data = train)
+
+#Predicting the test data
+pred_lda1 = predict(lda1, newdata=test)$class
+
+#Comparing predictions vs. real
+tab = table(pred_lda1, test$category)
+#did LDA predict no people in income_p_asset_p or am I reading the table wrong? 
+#Calculating misclassification rate
+misclassification.rate(tab)
+#LDA misclassified 28.4% of observations
+
+##QDA model
+qda1 = qda(category~provcd+countyid+urban+f_income+expense+asset_tot+debt_tot+old+children+depen+age+gender+edu_highest+marriage+health+employ, data = train)
+
+#Predicting the test data
+pred_qda1 = predict(qda1, newdata=test)$class
+
+#Comparing predictions vs. real
+tab2 = table(pred_qda1, test$category)
+
+#Calculating misclassification rate
+misclassification.rate(tab2)
+#QDA misclassified 21.4% of observations, much better than LDA
+
+##KNN won't run with NA obs, so we have to decide what we're doing with 
+#the ones that have too many NAs, like expense, before we run this model to compare
+#with LDA and QDA
+model <- train(
+  category~provcd+countyid+urban+f_income+expense+asset_tot+debt_tot+old+children+depen+age+gender+edu_highest+marriage+health+employ, 
+  data=data, 
+  method='knn',
+  tuneGrid=expand.grid(.k=1:25),
+  metric='Accuracy',
+  trControl=trainControl(
+    method='repeatedcv', 
+    number=10, 
+    repeats=15))
+model
+plot(model)
